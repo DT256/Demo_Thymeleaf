@@ -1,0 +1,75 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+<header th:replace="/header :: header"></header>
+
+<div class="container" >
+    <div th:if="${message}">
+        <div th:text="${message}" class="alert alert-success"></div>
+        <a href="/admin/categories/add">Add category</a>
+
+        <form th:action="@{/admin/categories/searchpaginated}" method="get">
+            <input type="text" name="name" id="name" placeholder="Nhập từ khóa để tìm" th:value="${name}" />
+            <button type="submit">Search</button>
+        </form>
+
+        <div th:if="${!categoryPage.hasContent()}">
+            No Category
+        </div>
+
+        <div th:if="${categoryPage.hasContent()}">
+            <table class="table table-striped table-bordered">
+                <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Images</th>
+                    <th>Category name</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="cate, status : ${categoryPage.content}">
+                    <td th:text="${status.index + 1}"></td>
+                    <td th:text="${cate.images}"></td>
+                    <td th:text="${cate.name}"></td>
+                    <td>
+                        <a th:href="@{'/admin/categories/edit/' + ${cate.categoryId}}" class="btn btn-primary btn-sm">Sửa</a>
+                        <a th:href="@{'/admin/categories/delete/' + ${cate.categoryId}}" class="btn btn-danger btn-sm">Xóa</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <form method="get" th:action="@{/admin/categories/searchpaginated}">
+            <label for="size">Page size:</label>
+            <select name="size" id="size" onchange="this.form.submit()">
+                <option th:value="3" th:selected="${categoryPage.size == 3}">3</option>
+                <option th:value="5" th:selected="${categoryPage.size == 5}">5</option>
+                <option th:value="10" th:selected="${categoryPage.size == 10}">10</option>
+                <option th:value="15" th:selected="${categoryPage.size == 15}">15</option>
+                <option th:value="20" th:selected="${categoryPage.size == 20}">20</option>
+            </select>
+        </form>
+
+        <div th:if="${categoryPage.totalPages > 0}">
+            <ul>
+                <li th:each="pageNumber : ${pageNumbers}"
+                    th:class="${pageNumber == categoryPage.number + 1 ? 'page-item active' : 'page-item'}">
+                    <a th:href="@{'/admin/categories/searchpaginated'(name=${name},size=${categoryPage.size},page=${pageNumber})}"
+                       th:text="${pageNumber}"></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+<footer th:replace="/footer :: footer"></footer>
+
+</body>
+
+</html>
+
