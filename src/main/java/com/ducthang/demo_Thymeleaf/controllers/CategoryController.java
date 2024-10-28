@@ -16,7 +16,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.naming.Binding;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -69,55 +68,48 @@ public class CategoryController {
     public String update(@PathVariable("id") long id, @Valid CategoryEntity category, BindingResult result,
                          Model model){
         if (result.hasErrors()){
-            return "update";
+            return "list";
         }
         categoryService.save(category);
-        return "list";
+        return "redirect:/categories";
     }
 
     @GetMapping("search")
-    public String search(ModelMap model, @RequestParam(name = "name",required = false) String name) {
+    public String search(ModelMap model, @RequestParam(name = "name", required = false) String name) {
         List<CategoryEntity> list = null;
-        if(StringUtils.hasText(name)){
+        if (StringUtils.hasText(name)) {
             list = categoryService.findByNameContaining(name);
-        }
-        else
+        } else {
             list = categoryService.findAll();
-
-        model.addAttribute("categories", list);
+        }
+        model.addAttribute("list", list);
         return "search";
     }
-
-    @RequestMapping("searchpage")
-    public String search(ModelMap model,
-                         @RequestParam(name = "name",required = false) String name,
-                         @RequestParam("page") Optional<Integer> page,
-                         @RequestParam("size") Optional<Integer> size) {
-        int count = (int)categoryService.count();
+    @RequestMapping("/searchpaginated")
+    public String search(ModelMap model, @RequestParam(name = "name", required = false) String name, @RequestParam("page") Optional < Integer > page, @RequestParam("size") Optional < Integer > size) {
+        int count = (int) categoryService.count();
         int currentPage = page.orElse(1);
         int pageSize = size.orElse(3);
         Pageable pageable = PageRequest.of(currentPage - 1, pageSize, Sort.by("name"));
-        Page<CategoryEntity> respage = null;
-        if(StringUtils.hasText(name)){
-            respage = categoryService.findByNameContaining(name, pageable);
+        Page< CategoryEntity > resultPage = null;
+        if(StringUtils.hasText(name)) {
+            resultPage = categoryService.findByNameContaining(name, pageable);
             model.addAttribute("name", name);
+        } else {
+            resultPage = categoryService.findAll(pageable);
         }
-        else {
-            respage = categoryService.findAll(pageable);
-        }
-        int toalPages = respage.getTotalPages();
-        if(toalPages > 0){
+        int totalPages = resultPage.getTotalPages();
+        if(totalPages > 0) {
             int start = Math.max(1, currentPage - 2);
-            int end = Math.min(toalPages, currentPage + 2);
-            if(toalPages > count){
-                if(end == toalPages) start = end - count;
-                else if (start == 1) end = start + count;
+            int end = Math.min(currentPage + 2, totalPages);
+            if(totalPages > count) {
+                if(end == totalPages) start = end - count;
+                else if(start == 1) end = start + count;
             }
-            List<Integer> pageNum = IntStream.rangeClosed(start,end)
-                    .boxed().collect(Collectors.toList());
-            model.addAttribute("pageNum", pageNum);
-            model.addAttribute("catePage", respage);
+            List < Integer > pageNumbers = IntStream.rangeClosed(start, end).boxed().collect(Collectors.toList());
+            model.addAttribute("pageNumbers", pageNumbers);
         }
-        return "searchpage";
+        model.addAttribute("categoryPage", resultPage);
+        return "searchpaging";
     }
 }
