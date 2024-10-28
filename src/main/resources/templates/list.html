@@ -27,7 +27,7 @@
         <td th:text="${iterStat.count}"></td>
         <td th:text="${category.name}"></td>
         <td>
-            <img th:src="@{category.image}"/>
+            <img th:src="${category.image}"/>
         </td>
         <td>
             <a th:href="@{/categories/edit/{id}(id=${category.categoryId})}" class="center">Edit</a>
