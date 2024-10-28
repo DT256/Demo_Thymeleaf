@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Hello World</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <!-- CSS -->
+    <link th:href="@{/css/bootstrap.css}" rel="stylesheet" />
+    <!-- JavaScript -->
+    <script th:src="@{/js/bootstrap.js}"></script>
+</head>
+<body>
+<header th:replace="/layout/header :: header"></header>
+
+<form action="#" th:action="@{/categories/update}" th:object="${category}" method="post">
+    <label for="name">Name</label>
+    <input type="text" th:field="*{categoryname}" id="name" placeholder="Name">
+    <span th:if="${#fields.hasErrors('categoryname')}" th:errors="*{categoryname}"></span>
+    <label for="email">Img</label>
+    <input type="text" th:field="*{image}" id="email" placeholder="Email">
+    <span th:if="${#fields.hasErrors('image')}" th:errors="*{image}"></span>
+    <input type="submit" value="Add Category">
+</form>
+
+<footer th:replace="/layout/footer :: footer"></footer>
+</body>
+</html>

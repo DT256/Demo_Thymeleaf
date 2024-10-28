@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Hello World</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <!-- CSS -->
+    <link th:href="@{/css/bootstrap.css}" rel="stylesheet" />
+    <!-- JavaScript -->
+    <script th:src="@{/js/bootstrap.js}"></script>
+</head>
+<body>
+<header th:replace="/header :: header"></header>
+
+<a th:href="@{/categories/signup}">Add Category</a>
+<table>
+    <tr>
+        <th>STT</th>
+        <th>Category name</th>
+        <th>Image</th>
+        <th>Modify</th>
+    </tr>
+
+    <tbody>
+    <tbody>
+    <tr th:each="category, iterStat : ${list}">
+        <td th:text="${iterStat.count}"></td>
+        <td th:text="${category.categoryname}"></td>
+        <td>
+            <img th:src="@{category.image}"/>
+        </td>
+        <td>
+            <a th:href="@{/categories/edit/{id}(id=${category.id})}" class="center">Edit</a>
+            <a th:href="@{/categories/delete/{id}(id=${category.id})}" class="center">Delete</a>
+        </td>
+    </tr>
+
+
+    </tbody>
+</table>
+
+
+<footer th:replace="/footer :: footer"></footer>
+</body>
+</html>
