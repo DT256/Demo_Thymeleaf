@@ -2,11 +2,8 @@ package com.ducthang.demo_Thymeleaf.controllers;
 
 
 import com.ducthang.demo_Thymeleaf.entity.CategoryEntity;
-import com.ducthang.demo_Thymeleaf.models.CategoryModel;
 import com.ducthang.demo_Thymeleaf.services.ICategoryService;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.validation.Valid;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,80 +12,67 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.util.StringUtils;
 
+import javax.naming.Binding;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Controller
-@RequestMapping("admin/categories")
+@RequestMapping("/categories")
 public class CategoryController {
+
     @Autowired
     ICategoryService categoryService;
-
-    @GetMapping("add")
-    public String addCategory(Model model) {
-        CategoryModel category = new CategoryModel();
-        category.setIsEdit(false);
-        model.addAttribute("category", category);
-        return "admin/categories/addOrEdit";
-    }
-
-    @PostMapping("saveOrUpdate")
-    public ModelAndView saveOrUpdate(ModelMap model,
-                                     @Valid @ModelAttribute("category") CategoryModel cateModel, BindingResult bindingResult) {
-        if(bindingResult.hasErrors()) {
-            return new ModelAndView("admin/categories/addOrEdit");
-        }
-        CategoryEntity categoryEntity = new CategoryEntity();
-        BeanUtils.copyProperties(cateModel, categoryEntity);
-        categoryService.save(categoryEntity);
-        String msg = "";
-        if(cateModel.getIsEdit() == true) {
-            msg = "Category is edit";
-        }
-        else {
-            msg = "Category is save";
-        }
-        model.addAttribute("msg", msg);
-        return new ModelAndView("foward:/admin/categories/searchpage",model);
-        //return new ModelAndView("foward:/admin/categories/search", model);// xem laij
-    }
-
-    @RequestMapping("")
-    public String list(ModelMap model) {
+    @GetMapping
+    public String getAll(ModelMap modelMap){
         List<CategoryEntity> list = categoryService.findAll();
-        model.addAttribute("categories", list);
+        System.out.println(list.size());
+        modelMap.addAttribute("list", list);
         return "list";
     }
 
-    @GetMapping("edit/categoryId")
-    public ModelAndView editCategory(ModelMap model, @PathVariable("categoryId") Long categoryId) {
-        Optional<CategoryEntity> optionalCategory = categoryService.findById(categoryId);
-        CategoryModel categoryModel = new CategoryModel();
-        if(optionalCategory.isPresent()) {
-            CategoryEntity category = optionalCategory.get();
-            BeanUtils.copyProperties(category, categoryModel);
-            categoryModel.setIsEdit(true);
-            model.addAttribute("category", categoryModel);
-            return new ModelAndView("admin/categories/addOrEdit", model);
-
-        }
-        model.addAttribute("msg", "Category not found");
-        return new ModelAndView("admin/categories/addOrEdit", model);
+    @GetMapping("/signup")
+    public String signup(CategoryEntity category, ModelMap modelMap){
+        modelMap.addAttribute("category", category);
+        return "add";
     }
 
-    @GetMapping("delete/categoryId")
-    public ModelAndView delete(ModelMap model,@PathVariable("categoryId") Long categoryId) {
-        categoryService.deleteById(categoryId);
-        model.addAttribute("msg", "Category deleted successfully");
-        return new ModelAndView("foward:/admin/categories/searchpage",model);
+    @PostMapping("/add")
+    public String add(@Valid CategoryEntity category, BindingResult result, Model model){
+        if (result.hasErrors()) {
+            return "add";
+        }
+        categoryService.save(category);
+        return "redirect:/categories";
+    }
+
+    @GetMapping("/delete/{id}")
+    public String delete(@PathVariable("id") long id, Model model){
+        categoryService.deleteById(id);
+        return "redirect:/categories";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") long id, Model model){
+        CategoryEntity category = categoryService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Not found"));
+        model.addAttribute("category", category);
+        return "update";
+    }
+
+    @PostMapping("/update/{id}")
+    public String update(@PathVariable("id") long id, @Valid CategoryEntity category, BindingResult result,
+                         Model model){
+        if (result.hasErrors()){
+            return "update";
+        }
+        categoryService.save(category);
+        return "list";
     }
 
     @GetMapping("search")
@@ -101,12 +85,12 @@ public class CategoryController {
             list = categoryService.findAll();
 
         model.addAttribute("categories", list);
-        return "admin/categories/search";
+        return "search";
     }
 
     @RequestMapping("searchpage")
     public String search(ModelMap model,
-                        @RequestParam(name = "name",required = false) String name,
+                         @RequestParam(name = "name",required = false) String name,
                          @RequestParam("page") Optional<Integer> page,
                          @RequestParam("size") Optional<Integer> size) {
         int count = (int)categoryService.count();
@@ -134,7 +118,6 @@ public class CategoryController {
             model.addAttribute("pageNum", pageNum);
             model.addAttribute("catePage", respage);
         }
-        return "admin/categories/searchpage";
+        return "searchpage";
     }
-
 }

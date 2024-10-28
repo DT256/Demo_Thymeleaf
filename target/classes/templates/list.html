@@ -25,13 +25,13 @@
     <tbody>
     <tr th:each="category, iterStat : ${list}">
         <td th:text="${iterStat.count}"></td>
-        <td th:text="${category.categoryname}"></td>
+        <td th:text="${category.name}"></td>
         <td>
             <img th:src="@{category.image}"/>
         </td>
         <td>
-            <a th:href="@{/categories/edit/{id}(id=${category.id})}" class="center">Edit</a>
-            <a th:href="@{/categories/delete/{id}(id=${category.id})}" class="center">Delete</a>
+            <a th:href="@{/categories/edit/{id}(id=${category.categoryId})}" class="center">Edit</a>
+            <a th:href="@{/categories/delete/{id}(id=${category.categoryId})}" class="center">Delete</a>
         </td>
     </tr>
 

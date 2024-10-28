@@ -21,5 +21,8 @@ public class CategoryEntity implements Serializable {
     @Column(name = "category_name", columnDefinition = "nvarchar(200) not null")
     private String name;
 
+    @Column(name = "image", columnDefinition = "nvarchar(500) not null")
+    private String image;
+
 
 }
